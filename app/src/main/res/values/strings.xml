@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">FlickrLoader</string>
+    <string name="loader_query_hint">Type here to search</string>
+    <string name="error_message">Something went wrong</string>
+    <string name="query_default">kittens</string>
 </resources>

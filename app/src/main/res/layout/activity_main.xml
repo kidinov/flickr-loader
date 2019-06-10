@@ -1,8 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:padding="@dimen/spacing_16"
+    tools:context=".loader.view.LoaderActivity">
 
-</LinearLayout>
+    <EditText
+        android:id="@+id/et_query"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginEnd="@dimen/spacing_8"
+        android:layout_marginRight="@dimen/spacing_8"
+        android:layout_toStartOf="@id/btn_search"
+        android:layout_toLeftOf="@id/btn_search"
+        android:hint="@string/loader_query_hint"
+        android:inputType="text"
+        android:text="@string/query_default" />
+
+    <ImageButton
+        android:id="@+id/btn_search"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_search" />
+
+    <GridView
+        android:id="@+id/gv_pictures"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et_query"
+        android:layout_marginTop="@dimen/spacing_16" />
+
+</RelativeLayout>
