@@ -12,7 +12,10 @@ class PhotosMapperImpl(private val config: Configuration) : PhotosMapper {
         val obj = JSONObject(json).getJSONObject("photos")
         val photoList = obj.getJSONArray("photo").run {
             ArrayList<Photo>(length()).apply {
-                repeat(length()) { add(Photo(getJSONObject(it).buildPictureUrl())) }
+                repeat(length()) {
+                    val photoObject = getJSONObject(it)
+                    add(Photo(photoObject.getLong("id"), photoObject.buildPictureUrl()))
+                }
             }
         }
         return Photos(

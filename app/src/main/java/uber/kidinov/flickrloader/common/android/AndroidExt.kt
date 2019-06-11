@@ -1,4 +1,4 @@
-package uber.kidinov.flickrloader.common.util
+package uber.kidinov.flickrloader.common.android
 
 import android.content.res.Resources
 

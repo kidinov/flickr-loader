@@ -1,3 +1,6 @@
 package uber.kidinov.flickrloader.loader.model
 
-data class Photo(val url: String)
+data class Photo(
+    val id: Long,
+    val url: String
+)

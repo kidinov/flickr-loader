@@ -1,12 +1,15 @@
 package uber.kidinov.flickrloader.loader.view
 
+import android.graphics.Bitmap
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import uber.kidinov.flickrloader.R
+import uber.kidinov.flickrloader.common.android.dp
+import uber.kidinov.flickrloader.common.picture.LoadingProgress
 import uber.kidinov.flickrloader.common.picture.PictureLoader
-import uber.kidinov.flickrloader.common.util.dp
 import uber.kidinov.flickrloader.loader.LoaderContract
 
 class LoaderAdapter(
@@ -27,13 +30,16 @@ class LoaderAdapter(
         } else {
             convertView as ImageView
         }
+        Log.d("LoaderAdapter", "getView $convertView")
         presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
         return imageView
     }
 
+    override fun hasStableIds() = true
+
     override fun getItem(position: Int): Any = Unit
 
-    override fun getItemId(position: Int): Long = 0
+    override fun getItemId(position: Int): Long = presenter.getItemId(position)
 
     override fun getCount(): Int = presenter.getCount()
 
@@ -42,12 +48,17 @@ class LoaderAdapter(
         private val pictureLoader: PictureLoader
     ) : LoaderContract.ItemView {
         override fun bindPicture(url: String) {
-            pictureLoader.loadPicture(
-                imageView,
-                url,
-                R.drawable.ic_loading_progress,
-                R.drawable.ic_loading_error
-            )
+            val progressCallback = object : LoadingProgress {
+                override fun onLoadingStarted() {
+                    imageView.setImageResource(R.drawable.ic_loading_progress)
+                }
+
+                override fun onResult(bitmap: Bitmap?) {
+                    if (bitmap == null) imageView.setImageResource(R.drawable.ic_loading_error)
+                    else imageView.setImageBitmap(bitmap)
+                }
+            }
+            pictureLoader.loadPicture(url, progressCallback)
         }
     }
 }

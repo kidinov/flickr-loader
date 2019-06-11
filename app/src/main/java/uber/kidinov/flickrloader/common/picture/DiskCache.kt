@@ -3,13 +3,13 @@ package uber.kidinov.flickrloader.common.picture
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import uber.kidinov.flickrloader.common.config.Configuration
 import java.io.File
 import java.io.FileFilter
 import java.io.FileOutputStream
 import java.math.BigInteger
 import java.security.MessageDigest
-
 
 const val FILE_EXT = "jpg"
 
@@ -28,7 +28,9 @@ class DiskCache(
 
     fun get(key: String): Bitmap? {
         synchronized(lock) {
-            val file = File(cacheDir, key.buildFileName())
+            val file = getFile(key)
+
+            Log.d("PictureLoader", "$key disk cache get $file - ${file.exists()}")
 
             return if (file.exists()) {
                 file.setLastModified(System.currentTimeMillis())
@@ -39,24 +41,29 @@ class DiskCache(
 
     fun put(key: String, bitmap: Bitmap) {
         synchronized(lock) {
-            val file = File(cacheDir, key.buildFileName())
+            val file = getFile(key)
+            Log.d("PictureLoader", "$key disk cache put $file - ${file.exists()}")
             if (file.exists()) {
                 file.setLastModified(System.currentTimeMillis())
                 return
             }
-
             FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
-
-            val files = cacheDir
-                .listFiles(FileFilter { it.isFile && it.extension == FILE_EXT })
-                .sortedBy { it.lastModified() }
-            if (files.size > config.DISK_CACHE_FILES_AMOUNT) {
-                files.last().delete()
-            }
+            evictOldFiles()
         }
     }
 
-    private fun String.buildFileName() = md5().plus(".$FILE_EXT")
+    private fun evictOldFiles() {
+        val files = cacheDir
+            .listFiles(FileFilter { it.isFile && it.extension == FILE_EXT })
+            .sortedByDescending { it.lastModified() }
+        var size = files.size
+        while (size > config.DISK_CACHE_FILES_AMOUNT) {
+            size--
+            files[size].delete()
+        }
+    }
+
+    private fun getFile(key: String) = File(cacheDir, "${key.md5()}.$FILE_EXT")
 
     private fun String.md5(): String {
         val md = MessageDigest.getInstance("MD5")
