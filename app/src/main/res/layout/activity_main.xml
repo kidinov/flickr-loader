@@ -33,6 +33,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/et_query"
-        android:layout_marginTop="@dimen/spacing_16" />
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/spacing_16"
+        android:gravity="center"
+        android:numColumns="3"
+        android:horizontalSpacing="@dimen/spacing_4"
+        android:verticalSpacing="@dimen/spacing_4" />
 
 </RelativeLayout>

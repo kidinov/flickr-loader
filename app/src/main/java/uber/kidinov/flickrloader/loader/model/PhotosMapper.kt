@@ -23,7 +23,7 @@ class PhotosMapperImpl(private val config: Configuration) : PhotosMapper {
     }
 
     private fun JSONObject.buildPictureUrl() =
-        config.pictureUrlTemplate.format(
+        config.PICTURE_URL_TEMPLATE.format(
             getInt("farm"),
             getString("server"),
             getString("id"),

@@ -11,7 +11,7 @@ class FlickrApi(
     private val config: Configuration
 ) : Api {
     override fun getPhotos(page: Int, query: String): Result<String> =
-        executor.executeGetRequest(config.baseUrl.buildPhotoUrl(page, query))
+        executor.executeGetRequest(config.BASE_URL.buildPhotoUrl(page, query))
 
     private fun String.buildPhotoUrl(page: Int, query: String) =
         this.plus("&text=$query").plus("&page=$page")

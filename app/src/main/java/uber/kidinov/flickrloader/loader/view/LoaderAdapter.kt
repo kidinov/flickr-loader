@@ -4,26 +4,30 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
+import uber.kidinov.flickrloader.R
+import uber.kidinov.flickrloader.common.picture.PictureLoader
+import uber.kidinov.flickrloader.common.util.dp
 import uber.kidinov.flickrloader.loader.LoaderContract
-import uber.kidinov.flickrloader.loader.presenter.LoaderPresenter
 
 class LoaderAdapter(
-    private val presenter: LoaderPresenter,
-    private val activity: LoaderActivity
+    private val presenter: LoaderContract.Presenter,
+    private val activity: LoaderActivity,
+    private val pictureLoader: PictureLoader
 ) : BaseAdapter() {
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val imageView: ImageView
 
-        if (convertView == null) {
-            imageView = ImageView(activity)
-            imageView.layoutParams = ViewGroup.LayoutParams(130, 130)
-            imageView.scaleType = ImageView.ScaleType.CENTER_CROP
-            imageView.setPadding(16, 16, 16, 16)
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val imageView = if (convertView == null) {
+            ImageView(activity).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    parent.width / 3 - 4.dp,
+                    parent.width / 3
+                )
+                scaleType = ImageView.ScaleType.CENTER_CROP
+            }
         } else {
-            imageView = convertView as ImageView
+            convertView as ImageView
         }
-        presenter.bindView(position, object: LoaderContract.ItemView())
-        imageView.setImageResource(imageIDs[position])
+        presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
         return imageView
     }
 
@@ -33,8 +37,17 @@ class LoaderAdapter(
 
     override fun getCount(): Int = presenter.getCount()
 
-    class ItemViewImpl(imageView: ImageView): LoaderContract.ItemView {
+    class ItemViewImpl(
+        private val imageView: ImageView,
+        private val pictureLoader: PictureLoader
+    ) : LoaderContract.ItemView {
         override fun bindPicture(url: String) {
+            pictureLoader.loadPicture(
+                imageView,
+                url,
+                R.drawable.ic_loading_progress,
+                R.drawable.ic_loading_error
+            )
         }
     }
 }

@@ -10,9 +10,9 @@ class LoaderRepo(
     private val async: Async
 ) : LoaderContract.Repo {
     override fun fetchPhotoUrls(page: Int, query: String, result: (Result<Photos>) -> Unit) {
-        async.doAsync {
+        async.doOnBcg {
             val photos = api.getPhotos(page, query).mapCatching { mapper.jsonToPhotos(it) }
-            async.onUiThread { result(photos) }
+            async.doOnUi { result(photos) }
         }
     }
 }
