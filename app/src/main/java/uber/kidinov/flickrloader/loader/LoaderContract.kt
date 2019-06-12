@@ -2,6 +2,7 @@ package uber.kidinov.flickrloader.loader
 
 import uber.kidinov.flickrloader.loader.model.Photo
 import uber.kidinov.flickrloader.loader.model.Photos
+import java.io.Serializable
 
 interface LoaderContract {
     interface View {
@@ -11,15 +12,14 @@ interface LoaderContract {
     }
 
     interface Presenter {
-        val photos: MutableList<Photo>
-        var pages: Int
-        var lastPage: Int
+        var state: State
 
         fun onQueryChanged(query: String)
         fun onScrolledDown(query: String)
         fun getCount(): Int
         fun getItemId(position: Int): Long
         fun bindPicture(position: Int, itemViewImpl: ItemView)
+        fun getItem(position: Int): String
     }
 
     interface Repo {
@@ -29,4 +29,10 @@ interface LoaderContract {
     interface ItemView {
         fun bindPicture(url: String)
     }
+
+    data class State(
+        var photos: MutableList<Photo>,
+        var pages: Int,
+        var lastPage: Int
+    ) : Serializable
 }

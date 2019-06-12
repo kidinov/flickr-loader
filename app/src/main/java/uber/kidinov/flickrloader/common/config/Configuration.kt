@@ -13,5 +13,5 @@ object Configuration {
 
     const val PICTURE_URL_TEMPLATE = "https://farm%d.static.flickr.com/%s/%s_%s.jpg"
 
-    const val DISK_CACHE_FILES_AMOUNT = 300
+    const val DISK_CACHE_FILES_AMOUNT = 200
 }

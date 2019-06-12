@@ -11,10 +11,7 @@ import uber.kidinov.flickrloader.common.picture.DiskCache
 import uber.kidinov.flickrloader.common.picture.PictureLoader
 import uber.kidinov.flickrloader.common.util.Async
 import uber.kidinov.flickrloader.common.util.AsyncImpl
-import uber.kidinov.flickrloader.common.util.ComparePriority
-import java.util.concurrent.PriorityBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executors
 
 
 fun commons() = CommonModule
@@ -35,7 +32,6 @@ object CommonModule : CommonComponent {
     lateinit var application: Application
 
     private val networkExecutor = NetworkExecutorImpl()
-    private val pq = PriorityBlockingQueue<Runnable>(100, ComparePriority())
 
     override val configuration by lazy { Configuration }
     override val api: Api by lazy { FlickrApi(networkExecutor, configuration) }
@@ -44,13 +40,7 @@ object CommonModule : CommonComponent {
     override val async by lazy {
         AsyncImpl(
             Handler(Looper.getMainLooper()),
-            ThreadPoolExecutor(
-                2 * Runtime.getRuntime().availableProcessors(),
-                2 * Runtime.getRuntime().availableProcessors(),
-                10,
-                TimeUnit.SECONDS,
-                pq
-            )
+            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() - 1)
         )
     }
 }

@@ -30,11 +30,15 @@ class LoaderActivity : Activity(), LoaderContract.View {
         setContentView(R.layout.activity_main)
 
         initViews()
+        if (savedInstanceState != null) {
+            presenter.state = savedInstanceState.state as LoaderContract.State
+            updateList()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.page = presenter.lastPage
+        outState.state = presenter.state
     }
 
     override fun showError(error: String?) {
@@ -42,7 +46,6 @@ class LoaderActivity : Activity(), LoaderContract.View {
     }
 
     override fun updateList() {
-        adapter.notifyDataSetInvalidated()
         adapter.notifyDataSetChanged()
     }
 
@@ -64,9 +67,9 @@ class LoaderActivity : Activity(), LoaderContract.View {
     }
 
     companion object {
-        private const val OUT_STATE_PAGE = "lastPage"
-        private var Bundle.page
-            get() = getInt(OUT_STATE_PAGE)
-            set(value) = putInt(OUT_STATE_PAGE, value)
+        private const val OUT_STATE = "state"
+        private var Bundle.state
+            get() = getSerializable(OUT_STATE)
+            set(value) = putSerializable(OUT_STATE, value)
     }
 }

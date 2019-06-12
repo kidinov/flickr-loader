@@ -9,23 +9,27 @@ class LoaderPresenter(
 ) : LoaderContract.Presenter {
     private var loading = false
 
-    override val photos = mutableListOf<Photo>()
-    override var lastPage: Int = 1
-    override var pages: Int = 1
+    override var state: LoaderContract.State = LoaderContract.State(
+        mutableListOf<Photo>(),
+        1,
+        1
+    )
 
     override fun onQueryChanged(query: String) {
-        lastPage = 1
-        pages = 1
-        doFetch(lastPage, query) { photos.clear() }
+        state.lastPage = 1
+        state.pages = 1
+        state.photos.clear()
+        updateList(0, 0)
+        doFetch(state.lastPage, query)
     }
 
     override fun onScrolledDown(query: String) {
-        doFetch(lastPage, query)
+        doFetch(state.lastPage, query)
     }
 
-    private fun doFetch(page: Int, query: String, onSuccessExt: (() -> Unit)? = null) {
+    private fun doFetch(page: Int, query: String) {
         if (loading) return
-        if (lastPage > pages) return
+        if (state.lastPage > state.pages) return
 
         loading = true
         repo.fetchPhotoUrls(page, query) { result ->
@@ -33,24 +37,28 @@ class LoaderPresenter(
 
             if (result.isFailure) view.showError(result.exceptionOrNull()?.localizedMessage)
             else {
-                onSuccessExt?.invoke()
-
                 val photos = result.getOrThrow()
-                this.photos.addAll(photos.photos)
-                lastPage++
-                pages = photos.pages
+                state.photos.addAll(photos.photos)
+                state.lastPage++
+                state.pages = photos.pages
 
-                view.showSummary(photos.page - 1, photos.pages)
-                view.updateList()
+                updateList(photos.page - 1, photos.pages)
             }
         }
     }
 
-    override fun getItemId(position: Int): Long = photos[position].id
+    private fun updateList(pageNum: Int, pagesAmount: Int) {
+        view.showSummary(pageNum, pagesAmount)
+        view.updateList()
+    }
 
-    override fun getCount(): Int = photos.size
+    override fun getItemId(position: Int): Long = state.photos[position].id
+
+    override fun getCount(): Int = state.photos.size
 
     override fun bindPicture(position: Int, itemViewImpl: LoaderContract.ItemView) {
-        itemViewImpl.bindPicture(photos[position].url)
+        itemViewImpl.bindPicture(state.photos[position].url)
     }
+
+    override fun getItem(position: Int): String = state.photos[position].url
 }

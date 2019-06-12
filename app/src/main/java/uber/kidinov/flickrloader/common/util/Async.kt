@@ -2,25 +2,25 @@ package uber.kidinov.flickrloader.common.util
 
 import android.os.Handler
 import java.util.concurrent.ExecutorService
-
-enum class BcgPriority(val value: Int) {
-    LOW(0), HIGH(1)
-}
+import java.util.concurrent.Future
 
 interface Async {
-    fun doOnBcg(priority: BcgPriority = BcgPriority.LOW, task: () -> Unit)
-    fun doOnUi(func: () -> Unit)
+    fun doOnBcg(task: Runnable): Future<*>
+    fun doOnUi(task: Runnable)
+    fun removeUiRunnable(task: Runnable)
 }
 
 class AsyncImpl(
     private val uiHandler: Handler,
     private val executor: ExecutorService
 ) : Async {
-    override fun doOnBcg(priority: BcgPriority, task: () -> Unit) = executor.execute(
-        PriorityRunnable(priority.value, task)
-    )
+    override fun doOnBcg(task: Runnable): Future<*> = executor.submit(task)
 
-    override fun doOnUi(func: () -> Unit) {
-        uiHandler.post { func() }
+    override fun doOnUi(task: Runnable) {
+        uiHandler.post(task)
+    }
+
+    override fun removeUiRunnable(task: Runnable) {
+        uiHandler.removeCallbacks(task)
     }
 }

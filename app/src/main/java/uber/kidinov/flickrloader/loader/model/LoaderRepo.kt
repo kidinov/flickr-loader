@@ -1,8 +1,7 @@
 package uber.kidinov.flickrloader.loader.model
 
-import uber.kidinov.flickrloader.common.util.Async
 import uber.kidinov.flickrloader.common.network.Api
-import uber.kidinov.flickrloader.common.util.BcgPriority
+import uber.kidinov.flickrloader.common.util.Async
 import uber.kidinov.flickrloader.loader.LoaderContract
 
 class LoaderRepo(
@@ -11,9 +10,9 @@ class LoaderRepo(
     private val async: Async
 ) : LoaderContract.Repo {
     override fun fetchPhotoUrls(page: Int, query: String, result: (Result<Photos>) -> Unit) {
-        async.doOnBcg(BcgPriority.HIGH) {
+        async.doOnBcg(Runnable {
             val photos = api.getPhotos(page, query).mapCatching { mapper.jsonToPhotos(it) }
-            async.doOnUi { result(photos) }
-        }
+            async.doOnUi(Runnable { result(photos) })
+        })
     }
 }

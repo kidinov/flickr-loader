@@ -8,16 +8,19 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import uber.kidinov.flickrloader.R
 import uber.kidinov.flickrloader.common.android.dp
-import uber.kidinov.flickrloader.common.android.generateListViewId
 import uber.kidinov.flickrloader.common.picture.LoadingProgress
 import uber.kidinov.flickrloader.common.picture.PictureLoader
 import uber.kidinov.flickrloader.loader.LoaderContract
+import java.util.concurrent.atomic.AtomicInteger
 
 class LoaderAdapter(
     private val presenter: LoaderContract.Presenter,
     private val activity: LoaderActivity,
     private val pictureLoader: PictureLoader
 ) : BaseAdapter() {
+
+    private val nextGeneratedId = AtomicInteger(1)
+    private fun generateListViewId(): Int = nextGeneratedId.getAndIncrement()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val imageView = if (convertView == null) {
@@ -32,13 +35,16 @@ class LoaderAdapter(
         } else {
             convertView as ImageView
         }
-        presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
+        if (imageView.tag != getItemId(position)) {
+            presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
+            imageView.tag = getItemId(position)
+        }
         return imageView
     }
 
     override fun hasStableIds() = true
 
-    override fun getItem(position: Int): Any = Unit
+    override fun getItem(position: Int): Any = presenter.getItem(position)
 
     override fun getItemId(position: Int): Long = presenter.getItemId(position)
 
@@ -51,12 +57,16 @@ class LoaderAdapter(
         override fun bindPicture(url: String) {
             val progressCallback = object : LoadingProgress {
                 override fun onLoadingStarted() {
+                    imageView.setImageBitmap(null)
                     imageView.setBackgroundColor(Color.LTGRAY)
                 }
 
-                override fun onResult(bitmap: Bitmap?) {
-                    if (bitmap == null) imageView.setImageResource(R.drawable.ic_loading_error)
-                    else imageView.setImageBitmap(bitmap)
+                override fun onResult(bitmap: Bitmap) {
+                    imageView.setImageBitmap(bitmap)
+                }
+
+                override fun onError() {
+                    imageView.setImageResource(R.drawable.ic_loading_error)
                 }
             }
             pictureLoader.loadPicture(url, imageView.id, progressCallback)
