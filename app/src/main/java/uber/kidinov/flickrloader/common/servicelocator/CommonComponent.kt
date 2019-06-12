@@ -45,7 +45,7 @@ object CommonModule : CommonComponent {
         AsyncImpl(
             Handler(Looper.getMainLooper()),
             ThreadPoolExecutor(
-                1,
+                2 * Runtime.getRuntime().availableProcessors(),
                 2 * Runtime.getRuntime().availableProcessors(),
                 10,
                 TimeUnit.SECONDS,

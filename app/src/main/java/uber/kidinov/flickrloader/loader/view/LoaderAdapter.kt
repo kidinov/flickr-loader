@@ -1,13 +1,14 @@
 package uber.kidinov.flickrloader.loader.view
 
 import android.graphics.Bitmap
-import android.util.Log
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import uber.kidinov.flickrloader.R
 import uber.kidinov.flickrloader.common.android.dp
+import uber.kidinov.flickrloader.common.android.generateListViewId
 import uber.kidinov.flickrloader.common.picture.LoadingProgress
 import uber.kidinov.flickrloader.common.picture.PictureLoader
 import uber.kidinov.flickrloader.loader.LoaderContract
@@ -26,11 +27,11 @@ class LoaderAdapter(
                     parent.width / 3
                 )
                 scaleType = ImageView.ScaleType.CENTER_CROP
+                id = generateListViewId()
             }
         } else {
             convertView as ImageView
         }
-        Log.d("LoaderAdapter", "getView $convertView")
         presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
         return imageView
     }
@@ -50,7 +51,7 @@ class LoaderAdapter(
         override fun bindPicture(url: String) {
             val progressCallback = object : LoadingProgress {
                 override fun onLoadingStarted() {
-                    imageView.setImageResource(R.drawable.ic_loading_progress)
+                    imageView.setBackgroundColor(Color.LTGRAY)
                 }
 
                 override fun onResult(bitmap: Bitmap?) {
@@ -58,7 +59,7 @@ class LoaderAdapter(
                     else imageView.setImageBitmap(bitmap)
                 }
             }
-            pictureLoader.loadPicture(url, progressCallback)
+            pictureLoader.loadPicture(url, imageView.id, progressCallback)
         }
     }
 }
