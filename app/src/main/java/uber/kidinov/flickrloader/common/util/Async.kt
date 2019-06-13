@@ -11,7 +11,7 @@ interface Async {
 }
 
 class AsyncImpl(
-    private val uiHandler: Handler,
+    private val uiHandler: HandlerWrapper,
     private val executor: ExecutorService
 ) : Async {
     override fun doOnBcg(task: Runnable): Future<*> = executor.submit(task)
@@ -22,5 +22,20 @@ class AsyncImpl(
 
     override fun removeUiRunnable(task: Runnable) {
         uiHandler.removeCallbacks(task)
+    }
+}
+
+interface HandlerWrapper {
+    fun post(task: Runnable)
+    fun removeCallbacks(task: Runnable)
+}
+
+class HandlerWrapperImpl(private val handler: Handler) : HandlerWrapper {
+    override fun post(task: Runnable) {
+        handler.post(task)
+    }
+
+    override fun removeCallbacks(task: Runnable) {
+        handler.removeCallbacks(task)
     }
 }

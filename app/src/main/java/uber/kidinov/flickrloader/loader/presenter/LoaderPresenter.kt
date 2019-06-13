@@ -10,55 +10,64 @@ class LoaderPresenter(
     private var loading = false
 
     override var state: LoaderContract.State = LoaderContract.State(
-        mutableListOf<Photo>(),
-        1,
-        1
+        0,
+        0,
+        mutableListOf()
     )
 
+    override fun onRecreated() {
+        updateList(state.pageNum - 1, state.pages)
+    }
+
     override fun onQueryChanged(query: String) {
-        state.lastPage = 1
-        state.pages = 1
-        state.photos.clear()
-        updateList(0, 0)
-        doFetch(state.lastPage, query)
+        with(state) {
+            pageNum = 0
+            pages = 0
+            photos.clear()
+        }
+        updateList(state.pageNum, state.pages)
+        doFetch(state.pageNum, query)
     }
 
     override fun onScrolledDown(query: String) {
-        doFetch(state.lastPage, query)
-    }
-
-    private fun doFetch(page: Int, query: String) {
-        if (loading) return
-        if (state.lastPage > state.pages) return
-
-        loading = true
-        repo.fetchPhotoUrls(page, query) { result ->
-            loading = false
-
-            if (result.isFailure) view.showError(result.exceptionOrNull()?.localizedMessage)
-            else {
-                val photos = result.getOrThrow()
-                state.photos.addAll(photos.photos)
-                state.lastPage++
-                state.pages = photos.pages
-
-                updateList(photos.page - 1, photos.pages)
-            }
-        }
-    }
-
-    private fun updateList(pageNum: Int, pagesAmount: Int) {
-        view.showSummary(pageNum, pagesAmount)
-        view.updateList()
+        doFetch(state.pageNum, query)
     }
 
     override fun getItemId(position: Int): Long = state.photos[position].id
 
     override fun getCount(): Int = state.photos.size
 
-    override fun bindPicture(position: Int, itemViewImpl: LoaderContract.ItemView) {
-        itemViewImpl.bindPicture(state.photos[position].url)
+    override fun bindPicture(position: Int, itemView: LoaderContract.ItemView) {
+        itemView.bindPicture(state.photos[position].url)
     }
 
-    override fun getItem(position: Int): String = state.photos[position].url
+    override fun getItem(position: Int): Photo = state.photos[position]
+
+    private fun doFetch(page: Int, query: String) {
+        if (loading) return
+        if (state.pageNum > state.pages) return
+
+        loading = true
+        repo.fetchPhotoUrls(page, query) { result ->
+            loading = false
+
+            if (result.isSuccess) {
+                val response = result.getOrThrow()
+                with(state) {
+                    pageNum = response.page + 1
+                    pages = response.pages
+                    photos.addAll(response.photos)
+                }
+
+                updateList(state.pageNum - 1, state.pages)
+            } else {
+                view.showError(result.exceptionOrNull()?.localizedMessage)
+            }
+        }
+    }
+
+    private fun updateList(pageNum: Int, pagesAmount: Int) {
+        view.showSummary(pageNum, pagesAmount)
+        view.requestListDataChanged()
+    }
 }

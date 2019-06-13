@@ -10,6 +10,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import uber.kidinov.flickrloader.R
+import uber.kidinov.flickrloader.common.servicelocator.commons
 import uber.kidinov.flickrloader.common.servicelocator.loader
 import uber.kidinov.flickrloader.common.util.OnEndScrollListener
 import uber.kidinov.flickrloader.common.util.TextWatcherAdapter
@@ -30,10 +31,7 @@ class LoaderActivity : Activity(), LoaderContract.View {
         setContentView(R.layout.activity_main)
 
         initViews()
-        if (savedInstanceState != null) {
-            presenter.state = savedInstanceState.state as LoaderContract.State
-            updateList()
-        }
+        initState(savedInstanceState)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -45,7 +43,7 @@ class LoaderActivity : Activity(), LoaderContract.View {
         Toast.makeText(this, getString(R.string.error_message).plus("; Log: $error"), Toast.LENGTH_SHORT).show()
     }
 
-    override fun updateList() {
+    override fun requestListDataChanged() {
         adapter.notifyDataSetChanged()
     }
 
@@ -63,7 +61,18 @@ class LoaderActivity : Activity(), LoaderContract.View {
         })
 
         gvPictures.adapter = adapter
-        gvPictures.setOnScrollListener(OnEndScrollListener { presenter.onScrolledDown(etQuery.text.toString()) })
+        gvPictures.setOnScrollListener(OnEndScrollListener(commons().configuration) {
+            presenter.onScrolledDown(etQuery.text.toString())
+        })
+    }
+
+    private fun initState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            presenter.state = savedInstanceState.state as LoaderContract.State
+            presenter.onRecreated()
+        } else {
+            presenter.onQueryChanged(etQuery.text.toString())
+        }
     }
 
     companion object {

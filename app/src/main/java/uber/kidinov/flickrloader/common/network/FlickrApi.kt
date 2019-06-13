@@ -1,6 +1,5 @@
 package uber.kidinov.flickrloader.common.network
 
-import android.util.Log
 import uber.kidinov.flickrloader.common.config.Configuration
 
 interface Api {
@@ -13,7 +12,7 @@ class FlickrApi(
 ) : Api {
     override fun getPhotos(page: Int, query: String): Result<String> {
         val url = config.BASE_URL.buildPhotoUrl(page, query)
-        Log.d("FlickrApi", "Fetching with $url")
+        println("Fetching with $url")
         return executor.executeGetRequest(url)
     }
 

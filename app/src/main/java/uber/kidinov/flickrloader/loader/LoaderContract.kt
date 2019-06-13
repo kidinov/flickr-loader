@@ -7,19 +7,21 @@ import java.io.Serializable
 interface LoaderContract {
     interface View {
         fun showError(error: String?)
-        fun updateList()
+        fun requestListDataChanged()
         fun showSummary(pageNum: Int, pagesAmount: Int)
     }
 
     interface Presenter {
         var state: State
 
+        fun onRecreated()
+
         fun onQueryChanged(query: String)
         fun onScrolledDown(query: String)
         fun getCount(): Int
         fun getItemId(position: Int): Long
-        fun bindPicture(position: Int, itemViewImpl: ItemView)
-        fun getItem(position: Int): String
+        fun bindPicture(position: Int, itemView: ItemView)
+        fun getItem(position: Int): Photo
     }
 
     interface Repo {
@@ -31,8 +33,8 @@ interface LoaderContract {
     }
 
     data class State(
-        var photos: MutableList<Photo>,
+        var pageNum: Int,
         var pages: Int,
-        var lastPage: Int
+        var photos: MutableList<Photo>
     ) : Serializable
 }

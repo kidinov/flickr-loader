@@ -18,28 +18,33 @@ class LoaderAdapter(
     private val activity: LoaderActivity,
     private val pictureLoader: PictureLoader
 ) : BaseAdapter() {
-
-    private val nextGeneratedId = AtomicInteger(1)
+    private val nextGeneratedId = AtomicInteger(0)
     private fun generateListViewId(): Int = nextGeneratedId.getAndIncrement()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         val imageView = if (convertView == null) {
             ImageView(activity).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    parent.width / 3 - 4.dp,
-                    parent.width / 3
-                )
+                buildAndSetLayoutParams(parent)
                 scaleType = ImageView.ScaleType.CENTER_CROP
                 id = generateListViewId()
             }
         } else {
             convertView as ImageView
         }
+        if (imageView.width == 0) imageView.buildAndSetLayoutParams(parent)
+
         if (imageView.tag != getItemId(position)) {
             presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
             imageView.tag = getItemId(position)
         }
         return imageView
+    }
+
+    private fun ImageView.buildAndSetLayoutParams(parent: ViewGroup) {
+        layoutParams = ViewGroup.LayoutParams(
+            parent.width / 3 - 4.dp,
+            parent.width / 3
+        )
     }
 
     override fun hasStableIds() = true
@@ -49,27 +54,27 @@ class LoaderAdapter(
     override fun getItemId(position: Int): Long = presenter.getItemId(position)
 
     override fun getCount(): Int = presenter.getCount()
+}
 
-    class ItemViewImpl(
-        private val imageView: ImageView,
-        private val pictureLoader: PictureLoader
-    ) : LoaderContract.ItemView {
-        override fun bindPicture(url: String) {
-            val progressCallback = object : LoadingProgress {
-                override fun onLoadingStarted() {
-                    imageView.setImageBitmap(null)
-                    imageView.setBackgroundColor(Color.LTGRAY)
-                }
-
-                override fun onResult(bitmap: Bitmap) {
-                    imageView.setImageBitmap(bitmap)
-                }
-
-                override fun onError() {
-                    imageView.setImageResource(R.drawable.ic_loading_error)
-                }
+class ItemViewImpl(
+    private val imageView: ImageView,
+    private val pictureLoader: PictureLoader
+) : LoaderContract.ItemView {
+    override fun bindPicture(url: String) {
+        val progressCallback = object : LoadingProgress {
+            override fun onLoadingStarted() {
+                imageView.setImageBitmap(null)
+                imageView.setBackgroundColor(Color.LTGRAY)
             }
-            pictureLoader.loadPicture(url, imageView.id, progressCallback)
+
+            override fun onResult(bitmap: Bitmap) {
+                imageView.setImageBitmap(bitmap)
+            }
+
+            override fun onError() {
+                imageView.setImageResource(R.drawable.ic_loading_error)
+            }
         }
+        pictureLoader.loadPicture(url, imageView.id, progressCallback)
     }
 }

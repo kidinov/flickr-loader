@@ -11,8 +11,8 @@ import uber.kidinov.flickrloader.common.picture.DiskCache
 import uber.kidinov.flickrloader.common.picture.PictureLoader
 import uber.kidinov.flickrloader.common.util.Async
 import uber.kidinov.flickrloader.common.util.AsyncImpl
+import uber.kidinov.flickrloader.common.util.HandlerWrapperImpl
 import java.util.concurrent.Executors
-
 
 fun commons() = CommonModule
 
@@ -36,11 +36,11 @@ object CommonModule : CommonComponent {
     override val configuration by lazy { Configuration }
     override val api: Api by lazy { FlickrApi(networkExecutor, configuration) }
     override val diskCache: DiskCache by lazy { DiskCache(configuration, application) }
-    override val pictureLoader by lazy { PictureLoader(async, diskCache) }
+    override val pictureLoader by lazy { PictureLoader(async, diskCache, configuration) }
     override val async by lazy {
         AsyncImpl(
-            Handler(Looper.getMainLooper()),
-            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors() - 1)
+            HandlerWrapperImpl(Handler(Looper.getMainLooper())),
+            Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors())
         )
     }
 }

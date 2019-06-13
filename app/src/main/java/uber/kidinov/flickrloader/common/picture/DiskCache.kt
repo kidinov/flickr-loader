@@ -16,29 +16,42 @@ class DiskCache(
     private val config: Configuration,
     context: Context
 ) {
+    private val lock = Any()
     private val cacheDir = context.cacheDir
 
     fun init() {
-        if (!cacheDir.exists()) cacheDir.mkdir()
+        synchronized(lock) {
+            if (!cacheDir.exists()) cacheDir.mkdir()
+        }
     }
 
     fun get(key: String): Bitmap? {
-        val file = getFile(key)
+        synchronized(lock) {
+            val file = getFile(key)
 
-        return if (file.exists()) {
-            file.setLastModified(System.currentTimeMillis())
-            BitmapFactory.decodeFile(file.absolutePath)
-        } else null
+            return if (file.exists()) {
+                file.setLastModified(System.currentTimeMillis())
+                BitmapFactory.decodeFile(file.absolutePath)
+            } else null
+        }
     }
 
     fun put(key: String, bitmap: Bitmap) {
-        val file = getFile(key)
-        if (file.exists()) {
+        synchronized(lock) {
+            val file = getFile(key)
+            if (file.exists()) {
+                return
+            }
             file.setLastModified(System.currentTimeMillis())
-            return
+            FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out) }
+            evictOldFiles()
         }
-        FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out) }
-        evictOldFiles()
+    }
+
+    fun clear() {
+        cacheDir
+            .listFiles(FileFilter { it.isFile && it.extension == FILE_EXT })
+            ?.forEach { it.delete() }
     }
 
     private fun evictOldFiles() {
@@ -46,7 +59,7 @@ class DiskCache(
             .listFiles(FileFilter { it.isFile && it.extension == FILE_EXT })
             .sortedByDescending { it.lastModified() }
         var size = files.size
-        while (size > config.DISK_CACHE_FILES_AMOUNT) {
+        while (size >= config.DISK_CACHE_FILES_AMOUNT) {
             size--
             files[size].delete()
         }
