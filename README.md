@@ -20,6 +20,7 @@ Same is done for the queue of messages I post on UI thread in order to post imag
 * Rather a naive image downloading. Firstly it downloaded into byte array and then already converting it into the bitmap. For some reason `BitmapFactory::decodeStream` sometimes was producing corrupted bitmaps when a thread was interrupted.
 * I share same thread pool for downloading images and making HTTP call. In order to make it more efficient, the priority queue should be used and HTTP call should have higher priority. 
 * Disk cache could be improved if a measure of "recently used" will not be last modified date of the file, but some in-memory data structure with reference on file names. Because last modified apparently is precise up to 1 second on android.
+* Backend model and the app model is the same. Separation often is useful. Also, I use `Serialisable` in order to save state via configuration changes. Parcelable is faster. 
 * UI is very simple and doesn't follow any serious standards
 * I used `jUnit`, `Mockito` and assertion library for testing. I hope this is fine. 
 
