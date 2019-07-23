@@ -7,6 +7,8 @@ import uber.kidinov.flickrloader.common.config.Configuration
 import uber.kidinov.flickrloader.common.network.Api
 import uber.kidinov.flickrloader.common.network.FlickrApi
 import uber.kidinov.flickrloader.common.network.NetworkExecutorImpl
+import uber.kidinov.flickrloader.common.picture.BitmapDecoder
+import uber.kidinov.flickrloader.common.picture.BitmapPool
 import uber.kidinov.flickrloader.common.picture.DiskCache
 import uber.kidinov.flickrloader.common.picture.PictureLoader
 import uber.kidinov.flickrloader.common.util.Async
@@ -26,17 +28,20 @@ interface CommonComponent {
     val pictureLoader: PictureLoader
     val async: Async
     val diskCache: DiskCache
+    val bitmapDecoder: BitmapDecoder
 }
 
 object CommonModule : CommonComponent {
     lateinit var application: Application
 
     private val networkExecutor = NetworkExecutorImpl()
+    private val bitmapPool = BitmapPool()
 
+    override val bitmapDecoder by lazy { BitmapDecoder(bitmapPool) }
     override val configuration by lazy { Configuration }
     override val api: Api by lazy { FlickrApi(networkExecutor, configuration) }
-    override val diskCache: DiskCache by lazy { DiskCache(configuration, application) }
-    override val pictureLoader by lazy { PictureLoader(async, diskCache, configuration) }
+    override val diskCache: DiskCache by lazy { DiskCache(configuration, bitmapDecoder, application) }
+    override val pictureLoader by lazy { PictureLoader(async, diskCache, configuration, bitmapDecoder) }
     override val async by lazy {
         AsyncImpl(
             HandlerWrapperImpl(Handler(Looper.getMainLooper())),

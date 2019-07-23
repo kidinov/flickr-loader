@@ -14,7 +14,8 @@ import java.util.concurrent.FutureTask
 class PictureLoader(
     private val async: Async,
     private val diskCache: DiskCache,
-    private val config: Configuration
+    private val config: Configuration,
+    private val bitmapDecoder: BitmapDecoder
 ) {
     private val bcgFutureMap by lazy { ConcurrentHashMap<Int, Future<*>>() }
     private val uiRunnableMap by lazy { ConcurrentHashMap<Int, Runnable>() }
@@ -45,7 +46,7 @@ class PictureLoader(
             }
 
             // Download picture
-            val bitmapResult = runCatching { URL(url).downloadBitmapFromURL(config.PIC_TARGET_SIZE) }
+            val bitmapResult = runCatching { URL(url).downloadBitmapFromURL(config.PIC_TARGET_SIZE, bitmapDecoder) }
 
             if (bitmapResult.exceptionOrNull() is InterruptedIOException
                 || Thread.currentThread().isInterrupted

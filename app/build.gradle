@@ -16,7 +16,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
-            debuggable false
+            debuggable true
         }
     }
 

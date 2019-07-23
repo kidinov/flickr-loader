@@ -2,7 +2,6 @@ package uber.kidinov.flickrloader.common.picture
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import uber.kidinov.flickrloader.common.config.Configuration
 import java.io.File
 import java.io.FileFilter
@@ -14,6 +13,7 @@ const val FILE_EXT = "jpg"
 
 class DiskCache(
     private val config: Configuration,
+    private val bitmapDecoder: BitmapDecoder,
     context: Context
 ) {
     private val lock = Any()
@@ -31,7 +31,7 @@ class DiskCache(
 
             return if (file.exists()) {
                 file.setLastModified(System.currentTimeMillis())
-                BitmapFactory.decodeFile(file.absolutePath)
+                bitmapDecoder.decodeFile(file.absolutePath)
             } else null
         }
     }
