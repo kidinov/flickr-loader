@@ -11,10 +11,7 @@ class BitmapDecoder(private val bitmapPool: BitmapPool) {
         BitmapFactory.decodeFile(pathName, options)
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
             options.inMutable = true
-            val inBitmap = bitmapPool.getBitmap(
-                options.outWidth,
-                options.outHeight
-            )
+            val inBitmap = bitmapPool.getBitmap(options)
             if (inBitmap != null && canUseForInBitmap(inBitmap, options)) {
                 options.inBitmap = inBitmap
             }
@@ -36,17 +33,16 @@ class BitmapDecoder(private val bitmapPool: BitmapPool) {
     fun decodeByteArray(data: ByteArray, offset: Int, length: Int, size: Int): Bitmap {
         val options = BitmapFactory.Options()
         options.inJustDecodeBounds = true
+        println("size before - ${data.size}")
         println("inSampleSize - ${options.inSampleSize}")
         BitmapFactory.decodeByteArray(data, offset, length, options)
+        println("size before - ${options.outWidth} ${options.outHeight}")
         options.inSampleSize = calculateInSampleSize(options, size, size)
         BitmapFactory.decodeByteArray(data, offset, length, options)
         println("inSampleSize - ${options.inSampleSize}")
+        val inBitmap = bitmapPool.getBitmap(options)
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
             options.inMutable = true
-            val inBitmap = bitmapPool.getBitmap(
-                options.outWidth,
-                options.outHeight
-            )
             if (inBitmap != null && canUseForInBitmap(inBitmap, options)) {
                 println("decodeByteArray inBitmap - $inBitmap")
                 options.inBitmap = inBitmap
@@ -62,7 +58,7 @@ class BitmapDecoder(private val bitmapPool: BitmapPool) {
             }
             BitmapFactory.decodeByteArray(data, offset, length, options)
         }
-        bitmapPool.putBitmap(resBmp)
+        if (inBitmap == null) bitmapPool.putBitmap(resBmp)
         return resBmp
     }
 

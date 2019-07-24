@@ -38,12 +38,12 @@ class PictureLoader(
         progressCallback.onLoadingStarted()
         val future = async.doOnBcg(FutureTask {
             // Check disk cache
-            diskCache.get(url)?.run {
-                memoryCache.put(url, this)
-                if (Thread.currentThread().isInterrupted) return@FutureTask
-                progressCallback.onResult(this)
-                return@FutureTask
-            }
+//            diskCache.get(url)?.run {
+//                memoryCache.put(url, this)
+//                if (Thread.currentThread().isInterrupted) return@FutureTask
+//                progressCallback.onResult(this)
+//                return@FutureTask
+//            }
 
             // Download picture
             val bitmapResult = runCatching { URL(url).downloadBitmapFromURL(config.PIC_TARGET_SIZE, bitmapDecoder) }
