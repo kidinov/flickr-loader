@@ -3,7 +3,7 @@ package uber.kidinov.flickrloader.loader.model
 import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
-import uber.kidinov.flickrloader.common.config.Configuration
+import uber.kidinov.flickrloader.common.config.FlickrConfiguration
 
 class PhotosMapperImplTest {
     private lateinit var mapper: PhotosMapper
@@ -40,7 +40,7 @@ class PhotosMapperImplTest {
 
     @Before
     fun init() {
-        mapper = PhotosMapperImpl(Configuration)
+        mapper = FlickrMapperImpl(FlickrConfiguration)
     }
 
     @Test

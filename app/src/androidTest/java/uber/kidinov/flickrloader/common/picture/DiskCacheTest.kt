@@ -10,11 +10,11 @@ import org.amshove.kluent.shouldEqual
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import uber.kidinov.flickrloader.common.config.Configuration
+import uber.kidinov.flickrloader.common.config.FlickrConfiguration
 
 @RunWith(AndroidJUnit4::class)
 class DiskCacheTest {
-    private val config = Configuration
+    private val config = FlickrConfiguration
     private lateinit var diskCache: DiskCache
 
     @Before

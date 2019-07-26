@@ -1,10 +1,9 @@
 package uber.kidinov.flickrloader.common.util
 
 import android.widget.AbsListView
-import uber.kidinov.flickrloader.common.config.Configuration
+import uber.kidinov.flickrloader.common.config.SCROLLING_THRESHOLD
 
 class OnEndScrollListener(
-    private val config: Configuration,
     private val onEnd: () -> Unit
 ) : AbsListView.OnScrollListener {
     override fun onScroll(
@@ -12,7 +11,7 @@ class OnEndScrollListener(
         totalItemCount: Int
     ) {
         val position = firstVisibleItem + visibleItemCount
-        val limit = totalItemCount - config.SCROLLING_THRESHOLD
+        val limit = totalItemCount - SCROLLING_THRESHOLD
 
         if (position >= limit && totalItemCount > 0) onEnd()
     }

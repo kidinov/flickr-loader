@@ -10,7 +10,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import uber.kidinov.flickrloader.R
-import uber.kidinov.flickrloader.common.servicelocator.commons
 import uber.kidinov.flickrloader.common.servicelocator.loader
 import uber.kidinov.flickrloader.common.util.OnEndScrollListener
 import uber.kidinov.flickrloader.common.util.TextWatcherAdapter
@@ -61,7 +60,7 @@ class LoaderActivity : Activity(), LoaderContract.View {
         })
 
         gvPictures.adapter = adapter
-        gvPictures.setOnScrollListener(OnEndScrollListener(commons().configuration) {
+        gvPictures.setOnScrollListener(OnEndScrollListener {
             presenter.onScrolledDown(etQuery.text.toString())
         })
     }

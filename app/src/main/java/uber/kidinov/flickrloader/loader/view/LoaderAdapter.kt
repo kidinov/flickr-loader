@@ -1,22 +1,18 @@
 package uber.kidinov.flickrloader.loader.view
 
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
+import com.bumptech.glide.Glide
 import uber.kidinov.flickrloader.R
 import uber.kidinov.flickrloader.common.android.dp
-import uber.kidinov.flickrloader.common.picture.LoadingProgress
-import uber.kidinov.flickrloader.common.picture.PictureLoader
 import uber.kidinov.flickrloader.loader.LoaderContract
 import java.util.concurrent.atomic.AtomicInteger
 
 class LoaderAdapter(
     private val presenter: LoaderContract.Presenter,
-    private val activity: LoaderActivity,
-    private val pictureLoader: PictureLoader
+    private val activity: LoaderActivity
 ) : BaseAdapter() {
     private val nextGeneratedId = AtomicInteger(0)
     private fun generateListViewId(): Int = nextGeneratedId.getAndIncrement()
@@ -34,7 +30,7 @@ class LoaderAdapter(
         if (imageView.width == 0) imageView.buildAndSetLayoutParams(parent)
 
         if (imageView.tag != getItemId(position)) {
-            presenter.bindPicture(position, ItemViewImpl(imageView, pictureLoader))
+            presenter.bindPicture(position, ItemViewImpl(imageView))
             imageView.tag = getItemId(position)
         }
         return imageView
@@ -57,24 +53,14 @@ class LoaderAdapter(
 }
 
 class ItemViewImpl(
-    private val imageView: ImageView,
-    private val pictureLoader: PictureLoader
+    private val imageView: ImageView
 ) : LoaderContract.ItemView {
     override fun bindPicture(url: String) {
-        val progressCallback = object : LoadingProgress {
-            override fun onLoadingStarted() {
-                imageView.setImageBitmap(null)
-                imageView.setBackgroundColor(Color.LTGRAY)
-            }
-
-            override fun onResult(bitmap: Bitmap) {
-                imageView.setImageBitmap(bitmap)
-            }
-
-            override fun onError() {
-                imageView.setImageResource(R.drawable.ic_loading_error)
-            }
-        }
-        pictureLoader.loadPicture(url, imageView.id, progressCallback)
+        Glide
+            .with(imageView.context)
+            .load(url)
+            .centerCrop()
+            .placeholder(R.drawable.ic_loading_error)
+            .into(imageView)
     }
 }

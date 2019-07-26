@@ -54,7 +54,7 @@ class LoaderPresenter(
             if (result.isSuccess) {
                 val response = result.getOrThrow()
                 with(state) {
-                    pageNum = response.page + 1
+                    pageNum += 1
                     pages = response.pages
                     photos.addAll(response.photos)
                 }

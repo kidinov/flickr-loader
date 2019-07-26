@@ -1,8 +1,8 @@
 package uber.kidinov.flickrloader.common.servicelocator
 
 import uber.kidinov.flickrloader.loader.LoaderContract
+import uber.kidinov.flickrloader.loader.model.FlickrMapperImpl
 import uber.kidinov.flickrloader.loader.model.LoaderRepo
-import uber.kidinov.flickrloader.loader.model.PhotosMapperImpl
 import uber.kidinov.flickrloader.loader.presenter.LoaderPresenter
 import uber.kidinov.flickrloader.loader.view.LoaderActivity
 import uber.kidinov.flickrloader.loader.view.LoaderAdapter
@@ -17,14 +17,13 @@ interface LoaderComponent {
 }
 
 class LoaderModule(private val activity: LoaderActivity) : LoaderComponent {
-    private val photosMapper = PhotosMapperImpl(commons().configuration)
+    private val photosMapper = FlickrMapperImpl()
 
     override val presenter: LoaderContract.Presenter by lazy { LoaderPresenter(activity, repo) }
     override val adapter: LoaderAdapter by lazy {
         LoaderAdapter(
             presenter,
-            activity,
-            commons().pictureLoader
+            activity
         )
     }
     override val repo: LoaderContract.Repo by lazy {

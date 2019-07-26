@@ -16,6 +16,7 @@ class AsyncImpl(
 ) : Async {
     override fun doOnBcg(task: Runnable): Future<*> = executor.submit(task)
 
+
     override fun doOnUi(task: Runnable) {
         uiHandler.post(task)
     }

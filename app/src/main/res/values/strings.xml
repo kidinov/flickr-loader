@@ -3,4 +3,5 @@
     <string name="loader_query_hint">Type here to search</string>
     <string name="error_message">Something went wrong</string>
     <string name="query_default">kittens</string>
+    <string name="title_activity_welcome">WelcomeActivity</string>
 </resources>
